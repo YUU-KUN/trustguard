@@ -16,10 +16,10 @@ module.exports = {
         'primary-grey': '#CFCFCF',
         'secondary-grey': '#BBCCDF',
         'red': '#D22912',
-        
+
         'primary-red': '#D22813',
         'primary-blue': '#1A3066',
-        'primary-green': '#1CE51C',
+        'primary-green': '#1CE51C', //56F397
         'primary-red': '#D22912',
         'primary-yellow': '#E3B72C',
       },
