@@ -1,11 +1,8 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-</script>
-
 <template>
   <div class="flex flex-col items-center justify-start w-screen h-screen bg-white">
     <RouterView name="Header" />
     <RouterView />
+    <RouterView name="Footer"/>
   </div>
 </template>
 
