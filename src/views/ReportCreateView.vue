@@ -35,7 +35,7 @@
                 <div v-show="state == 0">
                     <div class="mb-5">
                         <p class="font-semibold text-18 mb-2">Rekening Bank Terduga Pelanggaran</p>
-                        <p class="font-medium text-12 mb-2 text-grey w-2/3">Masukkan data rekening bank yang anda duga
+                        <p class="font-medium text-12 mb-2 text-grey">Masukkan data rekening bank yang anda duga
                             merupakan penipu atau melakukan pelanggaran
                         </p>
                     </div>
@@ -67,12 +67,12 @@
                                     placeholder="Masukkan nomor rekening terduga"
                                     class="p-4 rounded-lg font-medium text-12 w-full border border-grey mt-2">
                             </div>
-                            <div class="mb-3">
+                            <!-- <div class="mb-3">
                                 <label class="font-medium text-14" for="suspect_phone">Nomor Telepon Terduga</label>
                                 <input v-model="suspect_phone" id="suspect_phone" type="tel"
                                     placeholder="Masukkan nomor telepon terduga"
                                     class="p-4 rounded-lg font-medium text-12 w-full border border-grey mt-2">
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -221,6 +221,7 @@ export default {
     data() {
         return {
             state: 0, // 0 informasi, 1 kronologi, 2 identitas, 3 bukti, 4 sukses,
+            user_bank_id: this.$route.params.user_bank_id,
             banks: [],
             platforms: [],
             product_categories: [],
@@ -248,6 +249,18 @@ export default {
             this.axios.get('bank').then(response => {
                 this.banks = response.data.data
                 console.log(this.banks);
+            }).catch(error => {
+                console.log(error);
+            })
+        },
+        getUser() {
+            this.axios.get(`user-bank?user_bank_id=${this.user_bank_id}`).then(response => {
+                console.log(response.data.data);
+                const res = response.data.data
+                this.suspect_account_name = res.account_name
+                this.suspect_account_number = res.rekening_number
+                this.suspect_phone = res.user.phone
+                this.bank_id = res.bank_id
             }).catch(error => {
                 console.log(error);
             })
@@ -287,6 +300,7 @@ export default {
             formdata.append('identity_number', this.identity_number)
             formdata.append('reporter_phone', this.reporter_phone)
             formdata.append('evidences[]', this.evidences)
+
             this.axios.post('report', formdata).then(response => {
                 console.log(response.data);
             }).catch(error => {
@@ -334,9 +348,10 @@ export default {
         },
     },
     mounted() {
+        this.getUser(),
         this.getBanks(),
-            this.getPlatforms(),
-            this.getProductCategories()
+        this.getPlatforms(),
+        this.getProductCategories()
     }
 }
 </script>

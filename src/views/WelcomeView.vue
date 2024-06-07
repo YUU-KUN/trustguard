@@ -1,7 +1,6 @@
 <template>
     <div class="flex flex-col items-center justify-end w-full h-full">
-        <!-- <img src="/public/assets/logo/tsdn-logo.png" alt="tsdn-logo" class="mb-16"> -->
-        <img src="/public/assets/logo/welcome-logo.png" alt="welcom-logo">
+        <img src="/public/assets/logo/main-logo.png" alt="main-logo">
         <div class="relative flex flex-col items-center justify-center w-full h-1/2">
             <img src="/public/assets/img/wave-network.png" alt="wave-blue" class="absolute z-30 bottom-0 w-full">
             <div class="relative flex flex-col items-center justify-center w-full h-full">

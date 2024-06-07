@@ -22,7 +22,7 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-end">
-                    <button @click="createReport(transaction_detail.merchant_id)"
+                    <button @click="createReport(transaction_detail.user_bank_id)"
                         class="bg-primary rounded-lg py-3 px-6 text-white text-14">Laporkan</button>
                 </div>
             </div>
@@ -52,11 +52,11 @@ export default {
                 console.log(error);
             })
         },
-        createReport(merchant_id) {
+        createReport(user_bank_id) {
             this.$router.push({
                 name: "report-create",
                 params: {
-                    user_bank_id: 0
+                    user_bank_id
                 }
             })
         }

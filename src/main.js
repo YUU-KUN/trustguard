@@ -6,6 +6,7 @@ import router from './router'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 import store from './store'
+import PhosphorIcons from "@phosphor-icons/vue"
 
 var token = store.getters.getToken
 
@@ -29,5 +30,6 @@ const app = createApp(App)
 app.use(router)
 app.use(store)
 app.use(VueAxios, axios)
+app.use(PhosphorIcons)
 
 app.mount('#app')

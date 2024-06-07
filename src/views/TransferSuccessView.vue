@@ -31,7 +31,7 @@
                 </div>
                 <div class="mb-4">
                     <p class="font-normal text-12 mb-1">Nominal</p>
-                    <p class="font-semibold text-14">Rp {{ formatNumber(transaction_detail.amount) }}</p>
+                    <p class="font-semibold text-14">Rp {{ transaction_detail.amount }}</p>
                 </div>
                 <p class="text-primary font-bold text-14">Download</p>
             </div>

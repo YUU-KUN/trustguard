@@ -19,7 +19,6 @@
                     <label for="transfer_amount" class="text-14 font-medium">Nominal Transfer</label>
                     <input id="transfer_amount" type="number" v-model="transfer_amount" placeholder="Rp"
                         class="border border-grey rounded-lg p-4 w-full font-medium text-12 mt-2 mb-2">
-                    <p class="text-grey font-medium text-12">Maksimal jumlah transfer Rp{{ max_transfer }}</p>
                     <p class="text-red font-medium text-12">{{ message }}</p>
                 </div>
             </div>
@@ -57,20 +56,19 @@
                         alt="transaction-status-secure-big" class="mr-7">
                     <div v-if="is_fraud_detected" class="text-left">
                         <p class="text-primary-red font-semibold text-12 mb-2">WARNING</p>
-                        <p class="font-normal text-10 mb-2">AI kami mendeteksi transaksi pada rekening tersebut tidak
-                            aman.
+                        <p class="font-normal text-10 mb-2">AI mendeteksi transaksi pada rekening tersebut tidak aman.
                         </p>
                     </div>
                     <div v-else class="text-left">
                         <p class="text-primary-green font-semibold text-12 mb-2">SAFE </p>
-                        <p class="font-normal text-10 mb-2">AI kami mendeteksi transaksi pada rekening tersebut aman.
+                        <p class="font-normal text-10 mb-2">AI mendeteksi transaksi pada rekening tersebut aman.
                         </p>
                     </div>
                 </div>
                 <div v-if="is_fraud_detected" class="w-full">
                     <base-button text="Kembali" @click="is_checking_state = false" />
                     <base-button background="transparent" text_color="primary" class="text-primary" text="Lanjutkan"
-                        @click="payAmount()" />
+                        @click="activateCamera()" />
                 </div>
                 <div v-else class="w-full">
                     <base-button text="Lanjutkan" @click="activateCamera()" />
@@ -90,11 +88,24 @@
         <div class="relative flex flex-col items-center justify-center w-full h-full">
             <camera :resolution="{ width: 342, height: 600 }" ref="camera" autoplay>
             </camera>
-            <!-- <div class="w-fit mx-auto px-auto mb-7 absolute bottom-7 rounded-full bg-[#BBCCDF] p-2">
+            <!-- <div @click="snapshot" class="w-fit mx-auto px-auto mb-7 absolute bottom-7 rounded-full bg-[#BBCCDF] p-2">
                 <div class="rounded-full bg-white p-2">
                     <img src="/public/assets/icon/camera.png" alt="camera">
                 </div>
             </div> -->
+        </div>
+        <div v-if="is_verify_fail"
+            class="flex flex-col items-center justify-center absolute z-30 w-screen h-screen bg-black bg-opacity-90 top-0 left-0">
+            <div class="relative flex items-center justify-center">
+                <div class="absolute rounded-full drop-shadow-2xl blur-[200px] w-50v aspect-square bg-red p-5"></div>
+                <PhWarning :size="120" color="#ff0000" weight="fill" class=""/>
+            </div>
+            <p class="z-20 text-white font-bold text-18">Wajah tidak terdeteksi</p>
+            <div class="absolute bottom-7 px-6 self-end w-full">
+                <button @click="activateCamera" class="bg-primary py-4 w-full rounded-lg text-white font-semibold text-14 mb-5">Coba
+                    Lagi</button>
+                <button @click="is_camera_verify = false" class="bg-white py-4 w-full rounded-lg text-black font-semibold text-14">Kembali</button>
+            </div>
         </div>
     </div>
 </template>
@@ -114,12 +125,11 @@ export default {
             user_bank: '',
             transfer_amount: '',
             message: '',
-            max_transfer: 10_000_000,
 
             is_checking_state: false,
             is_fraud_detected: false,
             is_camera_verify: false,
-            // is_camera_loading: false,
+            is_verify_fail: false,
             camera: null,
         }
     },
@@ -127,16 +137,11 @@ export default {
         getUserBank() {
             this.axios.get(`user-bank?user_bank_id=${this.user_bank_id}`).then(response => {
                 this.user_bank = response.data.data
-                console.log(this.user_bank);
             }).catch(error => {
                 this.message = error.response.data.message
             })
         },
         predictFraud() {
-            if (this.transfer_amount > this.max_transfer) {
-                this.message = 'Nominal transfer maksimal Rp10.000.000'
-                return
-            }
             if (this.user.balance < this.transfer_amount) {
                 this.message = 'Saldo Anda tidak mencukupi'
                 return
@@ -156,28 +161,38 @@ export default {
         },
 
         activateCamera() {
-            this.camera = this.$refs.camera;
             this.is_camera_verify = true
+            this.is_verify_fail = false
             setTimeout(() => {
-                this.payAmount()
+                this.snapshot()
             }, 4000);
+            clearTimeout();
         },
 
         async snapshot() {
-            if (this.camera) {
-                const blob = await this.camera.snapshot();
+            if (this.$refs.camera) {
+                const blob = await this.$refs.camera.snapshot();
 
-                // To show the screenshot with an image tag, create a URL
-                const url = URL.createObjectURL(blob);
-                const base64 = await this.blobToBase64(blob);
+                // Create a FormData object
+                const formData = new FormData();
+                formData.append('user_id', '1301'); // You can name the file 'snapshot.png' or any other name you prefer
+                formData.append('file', blob); // You can name the file 'snapshot.png' or any other name you prefer
 
-                this.image.inlineData.mimeType = blob.type
-                this.image.inlineData.data = base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "")
-                this.image_url = url
-
-                // this.payAmount()
+                this.axios.post('http://localhost:5001/verify', formData).then(response => {
+                    if (response.data.result == 'Verified') {
+                        this.payAmount()
+                    } else {
+                        this.is_verify_fail = true
+                    }
+                }).catch((error) => {
+                    this.is_verify_fail = true
+                    console.log('Error:', error);
+                });
+            } else {
+                console.log('camera not found');
             }
         },
+
 
         payAmount() {
             const data = {
